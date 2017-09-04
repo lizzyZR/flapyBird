@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <style>
+        #canvas{
+            border: 1px solid #000;
+        }
+    </style>
+</head>
+<body>
+<canvas id="canvas" width="800" height="600"></canvas>
+<script>
+    var canvas = document.querySelector("#canvas");
+    var context = canvas.getContext("2d");
+    var sky = new Image();
+    var land = new Image();
+    var pipe1 = new Image();
+    var pipe2 = new Image();
+    var birds = new Image();
+
+    sky.src = 'img/sky.png';
+    land.src = 'img/land.png';
+    pipe1.src = 'img/pipe1.png';
+    pipe2.src = 'img/pipe2.png';
+    birds.src = 'img/birds.png';
+    var count = 0;
+    var arr = [sky,land,pipe1,pipe2,birds];
+     for(var i = 0 ; i < arr.length; i++){
+         arr[i].onload = function (){
+             count++;
+             if(count == arr.length){
+                var roleArr =[];
+
+                 window.addEventListener('click',function (){
+                     roleArr[roleArr.length-1].speed = -0.2;
+                 })
+                 function createRoles(){
+                     //天空
+                     for(var i = 0 ; i < 2; i++){
+                        var info = {
+                            image:sky,
+                            x:i * sky.width,
+                            context:context,
+                            canvas:canvas
+                        };
+                         var skynew = new Sky(info);
+                         roleArr.push(skynew);
+                     }
+                    // 陆地
+                      for(var i = 0 ; i < 4; i++){
+                          var info = {
+                              image:land,
+                              x:i*land.width,
+                              context:context,
+                              canvas:canvas
+                          };
+                         var landnew = new Land(info);
+                          roleArr.push(landnew);
+                       }
+                     // 管道
+                     var gap = (canvas.width - pipe2.width*6)/5;
+                     for(var i = 0 ; i < 6; i++){
+                        var info = {
+                            topImage:pipe2,
+                            bottomImage:pipe1,
+                            x:300 + i * (pipe2.width + gap),
+                            context:context,
+                            canvas:canvas,
+                            gap:gap,
+                            bottomOffset:land.height
+                        }
+                         var pipe2new = new Pipe2(info);
+                         roleArr.push(pipe2new);
+                     }
+                        // 小鸟
+                     var info = {
+                         image:birds,
+                         x:100,
+                         y:100,
+                         context:context,
+                         canvas:canvas
+                     };
+                     var birdnew = new Bird(info);
+                     roleArr.push(birdnew);
+                 }
+                 createRoles();
+                 function action(){
+                     context.clearRect(0,0,canvas.width,canvas.height);
+                     context.beginPath();
+                      for(var i = 0 ; i < roleArr.length; i++){
+                          roleArr[i].draw();
+                       }
+
+                    // 统计时间
+                     var nowTime = new Date();
+                     var delayTime = nowTime - startTime;
+                     var s = Math.floor(delayTime / 1000);
+                     var h = Math.floor(s / 3600);
+                     var m = Math.floor(s/ 60);
+                     var s = s % 60;
+                     var text = "欢迎吴安平小玩家，已坚持到"+h+"小时"+m+"分"+s+"秒啦";
+                     context.textAlign = 'right';
+                     context.textBaseline = 'top';
+                     context.font = '700 20px 微软雅黑';
+                     context.fillStyle = 'hotpink';
+                     context.fillText(text,canvas.width,0);
+
+                     var bird = roleArr[roleArr.length-1];
+                     // 小鸟碰地
+                     if(bird.y >= canvas.height - land.height - bird.h){
+                         return;
+                     }
+                     //  判断某个点是否在路径内
+
+                     if(context.isPointInPath(bird.x + bird.w/2,bird.y + bird.h/2)){
+                         console.log('111');
+                         return;
+                     }
+
+                     window.requestAnimationFrame(action);
+                 }
+                 var startTime = new Date();
+                 action();
+
+             }
+         }
+      }
+</script>
+<script src="sky.js"></script>
+<script src="./land.js"></script>
+<script src="./pipe2.js"></script>
+<script src="./bird.js"></script>
+</body>
+</html>
